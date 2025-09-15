@@ -1,0 +1,40 @@
+# Entornos virtuales
+venv/
+env/
+*.egg-info/
+
+# Archivos de configuración de Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Archivos de Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Datos grandes y resultados
+*.csv
+*.tsv
+*.xlsx
+*.h5
+*.pkl
+*.joblib
+*.npy
+*.npz
+
+# Salidas de modelos
+models/
+checkpoints/
+*.ckpt
+
+# Configuración de VS Code
+.vscode/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Otros
+*.bak
