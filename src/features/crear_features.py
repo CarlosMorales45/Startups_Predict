@@ -12,7 +12,8 @@ NUM_IMPUTE_COLS = [
     "presencia_redes","inversores_destacados","tiempo_fundacion"
 ]
 
-CAT_ENCODE_COLS = ["sector","ubicacion","estado_operativo","antiguedad_bucket"]
+# ← incluye sector_x_estado
+CAT_ENCODE_COLS = ["sector","ubicacion","estado_operativo","antiguedad_bucket","sector_x_estado"]
 
 def _impute_numeric(df):
     for c in NUM_IMPUTE_COLS:
@@ -22,7 +23,6 @@ def _impute_numeric(df):
     return df
 
 def _make_intensidad_redes(df):
-    # cap a 50 y reescala 0-1
     if "presencia_redes" in df.columns:
         capped = df["presencia_redes"].clip(lower=0, upper=100)
         df["intensidad_redes"] = (np.minimum(capped, 50) / 50.0).round(4)
@@ -36,7 +36,7 @@ def _make_log_monto(df):
 def _make_antiguedad(df):
     if "tiempo_fundacion" in df.columns:
         df["antiguedad"] = (NOW_YEAR - df["tiempo_fundacion"]).clip(lower=0)
-        bins = [-1,1,3,7,100]  # 0-1; 2-3; 4-7; 8+ años
+        bins = [-1,1,3,7,100]
         labels = ["0-1","2-3","4-7","8+"]
         df["antiguedad_bucket"] = pd.cut(df["antiguedad"], bins=bins, labels=labels)
     return df
@@ -47,13 +47,12 @@ def _make_ratios(df):
             df["tamano_equipo"] / (1.0 + (df["monto_financiado"] / 1e5))
         ).round(6)
     if "exp_fundadores" in df.columns:
-        # si no hay número de fundadores, asumimos que es media ya
         df["exp_media_fundadores"] = df["exp_fundadores"].astype(float).round(2)
     return df
 
 def _make_cross(df):
     if {"sector","estado_operativo"}.issubset(df.columns):
-        df["sector_x_estado"] = (df["sector"].astype(str) + "_" + df["estado_operativo"].astype(str))
+        df["sector_x_estado"] = df["sector"].astype(str) + "_" + df["estado_operativo"].astype(str)
     return df
 
 def _encode_categoricals(df):
@@ -62,7 +61,7 @@ def _encode_categoricals(df):
             df[c] = df[c].astype("category")
     used = [c for c in CAT_ENCODE_COLS if c in df.columns]
     df_encoded = pd.get_dummies(df, columns=used, drop_first=False)
-    print(f"Categorías codificadas: {used}")
+    print(f"Categorías codificadas: {used} | Shape: {df_encoded.shape}")
     return df_encoded
 
 def build_features(df_clean):
@@ -73,7 +72,7 @@ def build_features(df_clean):
     df = _make_antiguedad(df)
     df = _make_ratios(df)
     df = _make_cross(df)
-    # No codificamos 'descripcion' aquí (quedará como columna cruda para la variante de texto)
+    # 'descripcion' queda cruda (para el modelo de texto)
     df_final = _encode_categoricals(df)
     return df_final
 
