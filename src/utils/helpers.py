@@ -55,3 +55,6 @@ def map_yes_no(x):
         return int(float(s))
     except:
         return np.nan
+
+if __name__ == "__main__":
+    print("✅ helpers.py cargado correctamente.")

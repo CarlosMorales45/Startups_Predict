@@ -47,6 +47,8 @@ def clean_categoricals(df):
     return df
 
 def clean_numeric_and_flags(df):
+    # Asegura índice limpio tras operaciones
+    df = df.reset_index(drop=True)
     # monto_financiado
     if "monto_financiado" in df.columns:
         df["monto_financiado"] = df["monto_financiado"].apply(parse_money_to_float)
@@ -102,6 +104,8 @@ def run(in_path, out_path=None, impute=False):
             df_clean.to_parquet(out_path, index=False)
         else:
             df_clean.to_csv(out_path, index=False, encoding="utf-8")
+        print(f"✅ Datos limpios guardados en: {out_path}")
+        print(f"Shape final: {df_clean.shape}")
     return df_clean
 
 if __name__ == "__main__":

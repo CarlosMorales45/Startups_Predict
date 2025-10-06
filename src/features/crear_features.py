@@ -60,7 +60,9 @@ def _encode_categoricals(df):
     for c in CAT_ENCODE_COLS:
         if c in df.columns:
             df[c] = df[c].astype("category")
-    df_encoded = pd.get_dummies(df, columns=[c for c in CAT_ENCODE_COLS if c in df.columns], drop_first=False)
+    used = [c for c in CAT_ENCODE_COLS if c in df.columns]
+    df_encoded = pd.get_dummies(df, columns=used, drop_first=False)
+    print(f"Categorías codificadas: {used}")
     return df_encoded
 
 def build_features(df_clean):
@@ -80,6 +82,7 @@ def run(in_path, out_path):
     df_proc = build_features(df)
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     df_proc.to_csv(out_path, index=False, encoding="utf-8")
+    print(f"✅ Dataset procesado guardado en {out_path} | Shape: {df_proc.shape}")
     return df_proc
 
 if __name__ == "__main__":
