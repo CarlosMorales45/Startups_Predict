@@ -8,28 +8,22 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Archivos de Jupyter Notebook checkpoints
+# Jupyter checkpoints
 .ipynb_checkpoints/
 
-# Datos grandes y resultados
+# Datos grandes (puedes dejar esto si quieres)
 *.csv
 *.tsv
 *.xlsx
 *.h5
 *.pkl
-*.joblib
 *.npy
 *.npz
 
-# Salidas de modelos
-models/
-checkpoints/
-*.ckpt
-
-# Configuración de VS Code
+# VS Code
 .vscode/
 
-# Archivos de sistema
+# Sistema
 .DS_Store
 Thumbs.db
 

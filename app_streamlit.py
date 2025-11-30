@@ -7,20 +7,12 @@ import streamlit as st
 # Localizar raíz del proyecto y ajustar sys.path
 # --------------------------------------------------
 THIS_FILE = Path(__file__).resolve()
-THIS_DIR = THIS_FILE.parent
+PROJECT_ROOT = THIS_FILE.parent          # carpeta del repo (donde está app_streamlit.py)
+SRC_DIR = PROJECT_ROOT / "src"           # carpeta con el código fuente
 
-# Buscamos un directorio que tenga 'src' y (opcionalmente) 'data'
-PROJECT_ROOT = None
-for cand in [THIS_DIR, *THIS_DIR.parents]:
-    if (cand / "src").exists():
-        PROJECT_ROOT = cand
-        break
-
-if PROJECT_ROOT is None:
-    PROJECT_ROOT = THIS_DIR  # fallback
-
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+for p in (PROJECT_ROOT, SRC_DIR):
+    if str(p) not in sys.path:
+        sys.path.insert(0, str(p))
 
 # --------------------------------------------------
 # Configuración de página
@@ -34,12 +26,21 @@ st.set_page_config(
 st.write(f"🛠️ Proyecto cargado desde: `{PROJECT_ROOT}`")
 
 # --------------------------------------------------
-# Import del predictor con manejo de errores
+# Import del predictor con manejo de errores y fallback
 # --------------------------------------------------
 try:
+    # Caso normal: paquete src disponible
     from src.models.predictor import predecir_viabilidad
+except ModuleNotFoundError:
+    # Fallback: por si en el entorno solo se ve models/ directo
+    try:
+        from models.predictor import predecir_viabilidad
+    except Exception as e:
+        st.error("❌ No se pudo importar `predecir_viabilidad` desde el predictor.")
+        st.exception(e)
+        st.stop()
 except Exception as e:
-    st.error("❌ No se pudo importar `predecir_viabilidad` desde `src.models.predictor`.")
+    st.error("❌ Error inesperado al importar `predecir_viabilidad`.")
     st.exception(e)
     st.stop()
 
