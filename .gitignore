@@ -12,7 +12,6 @@ __pycache__/
 .ipynb_checkpoints/
 
 # Datos grandes (puedes dejar esto si quieres)
-*.csv
 *.tsv
 *.xlsx
 *.h5
