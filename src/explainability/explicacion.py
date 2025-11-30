@@ -155,11 +155,23 @@ def _spanish_join(items: List[str]) -> str:
     if len(items) == 2: return f"{items[0]} y {items[1]}"
     return ", ".join(items[:-1]) + f" y {items[-1]}"
 
-def explicar_texto(pipe, descripcion: str, stopwords: set = DEFAULT_STOP_ES, topk: int = 5, thr: float = 0.5) -> Dict[str, Any]:
+def explicar_texto(
+    pipe,
+    descripcion: str,
+    stopwords: set = DEFAULT_STOP_ES,
+    topk: int = 5,
+    thr: float | None = None
+) -> Dict[str, Any]:
     """
     Explicación entendible para público general.
+
+    Si `thr` es None, intenta usar `pipe._thr_demo` (umbral calibrado en entrenamiento).
+    Si no existe, usa 0.5.
     """
     pipe = _unwrap_estimator(pipe)
+
+    if thr is None:
+        thr = float(getattr(pipe, "_thr_demo", 0.5))
 
     prob = float(pipe.predict_proba([descripcion])[0, 1])
     viable = bool(prob >= thr)
@@ -178,11 +190,13 @@ def explicar_texto(pipe, descripcion: str, stopwords: set = DEFAULT_STOP_ES, top
     else:
         frase = (
             f"La startup **no parece viable** (probabilidad {prob:.2f}) "
-            f"porque no aparecen suficientes señales de tracción o madurez; lo más relevante fue {motivos_legibles or 'poca evidencia clara en el texto'}."
+            f"porque no aparecen suficientes señales de tracción o madurez; lo más relevante fue "
+            f"{motivos_legibles or 'poca evidencia clara en el texto'}."
         )
 
     return {
         "probabilidad": prob,
+        "umbral": float(thr),
         "viable": viable,
         "justificacion": f"Aportes: {just}",
         "interpretacion": frase
